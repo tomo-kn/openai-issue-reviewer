@@ -1,0 +1,26 @@
+name: Issue Reviewer
+
+on:
+  issues:
+    types: [edited]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Add comment
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const issueNumber = context.issue.number;
+            const octokit = github.getOctokit(env.GITHUB_TOKEN);
+            octokit.rest.issues.createComment({
+              ...context.repo,
+              issue_number: issueNumber,
+              body: "test"
+            });
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
