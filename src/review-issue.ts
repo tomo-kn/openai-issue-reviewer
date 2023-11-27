@@ -88,7 +88,7 @@ function createPrompt(
   body: string | null | undefined,
   language: string
 ) {
-  let prompt = `Language: ${language}. Review the following issue with title "${title}"`;
+  let prompt = `IMPORTANT: Entire response must be in the language with ISO code: ${language}. Review the following issue with title "${title}"`;
 
   if (body) {
     prompt += ` and description: "${body}"`;
