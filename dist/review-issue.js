@@ -16,6 +16,10 @@ async function reviewIssue() {
     issue_number: issueNumber,
   });
   const title = issue.title;
+  const model = issue.labels.includes("issue review 4")
+    ? "gpt-4-1106-preview"
+    : "gpt-3.5-turbo";
+
   const response = await openai.chat.completions.create({
     messages: [
       {
@@ -23,7 +27,7 @@ async function reviewIssue() {
         content: `Review the following issue title and provide insights: "${title}"`,
       },
     ],
-    model: "gpt-3.5-turbo",
+    model: model,
   });
   const reviewComment = response.choices[0].message.content?.trim();
 
