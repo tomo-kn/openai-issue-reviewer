@@ -21,11 +21,13 @@ const { data: issue } = await octokit.issues.get({
 
 const title = issue.title;
 const body = issue.body;
-const model = issue.labels.includes("issue review 4")
+const labelNames = issue.labels.map((label) =>
+  typeof label === "string" ? label : label?.name
+);
+const model = labelNames.includes("issue review 4")
   ? "gpt-4-1106-preview"
   : "gpt-3.5-turbo";
-console.log(`Using model ${model}`);
-console.log(`labels: ${JSON.stringify(issue.labels)}`);
+console.log(`Using model: ${model}`);
 const language = process.env.ISSUE_LANGUAGE ?? "en";
 
 async function reviewIssue() {
