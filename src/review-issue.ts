@@ -9,21 +9,24 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const issueNumber = context.issue.number;
+const owner = context.repo.owner;
+const repo = context.repo.repo;
+
+const { data: issue } = await octokit.issues.get({
+  owner,
+  repo,
+  issue_number: issueNumber,
+});
+
+const title = issue.title;
+const body = issue.body;
+const model = issue.labels.includes("issue review 4")
+  ? "gpt-4-1106-preview"
+  : "gpt-3.5-turbo";
+const language = process.env.ISSUE_LANGUAGE ?? "en";
+
 async function reviewIssue() {
-  const issueNumber = context.issue.number;
-  const owner = context.repo.owner;
-  const repo = context.repo.repo;
-
-  const { data: issue } = await octokit.issues.get({
-    owner,
-    repo,
-    issue_number: issueNumber,
-  });
-
-  const title = issue.title;
-  const body = issue.body;
-  const language = process.env.ISSUE_LANGUAGE ?? "en";
-
   const label = await getLabelFromTitle(title);
 
   const prompt = createPrompt(label, title, body, language);
@@ -35,7 +38,7 @@ async function reviewIssue() {
         content: prompt,
       },
     ],
-    model: "gpt-3.5-turbo",
+    model: model,
   });
 
   const reviewComment = response.choices[0].message.content?.trim();
@@ -56,7 +59,7 @@ async function getLabelFromTitle(title: string): Promise<string> {
         content: `Classify the following issue title into one of these categories: Bug, Feature, Question, Enhancement, Documentation, Help Wanted, Good First Issue. Title: "${title}"`,
       },
     ],
-    model: "gpt-3.5-turbo",
+    model: model,
   });
 
   const labelResponse = response.choices[0].message.content?.trim();
@@ -88,65 +91,77 @@ function createPrompt(
   body: string | null | undefined,
   language: string
 ) {
-  let prompt = `IMPORTANT: Entire response must be in the language with ISO code: ${language}. Review the following issue with title "${title}"`;
+  let prompt = `IMPORTANT: Entire response must be in the language with ISO code: ${language}.\n\n`;
 
+  // Step 1: Display the classified label
+  prompt += `1. Classified Label: ${label}\n\n`;
+
+  // Step 2: Review the issue based on the label
+  prompt += `2. Issue Review:\n`;
+
+  // Instruct to review the title and description
+  prompt += `Please review the issue titled "${title}"`;
   if (body) {
-    prompt += ` and description: "${body}"`;
+    prompt += ` with the following description: "${body}"`;
   }
+  prompt += ` and provide a detailed analysis based on the label category.\n`;
 
-  prompt +=
-    ". Please suggest improvements for a clearer and more effective issue based on the following points:";
-
+  // Add specific review points based on the label
   switch (label.toLowerCase()) {
     case "bug":
       prompt += `
-        - Is the cause and reproduction steps of the bug clear?
-        - Are the expected outcomes and impact of the bug well-defined?
-        - Are there any additional notes or considerations?`;
+      - Analyze if the cause and reproduction steps of the bug are clearly and accurately described.
+      - Assess if the expected outcomes and impact of the bug are well-defined and realistic.
+      - Suggest any additional notes or considerations that might enhance the clarity or completeness of the issue.`;
       break;
     case "feature":
       prompt += `
-        - Is the purpose and specification of the feature clear and understandable?
-        - Are the criteria for completion (Close conditions) clear and appropriate?
-        - Are there any additional notes or considerations?`;
+      - Evaluate if the purpose and specifications of the feature are clear, understandable, and well-articulated.
+      - Determine if the criteria for completion (Close conditions) are clear, appropriate, and achievable.
+      - Recommend any additional notes or considerations that could improve the feature proposal.`;
       break;
     case "question":
       prompt += `
-        - Is the question clear and concise?
-        - Are the context and background of the question provided?
-        - Are there any specific points that need clarification?`;
+      - Examine if the question is presented clearly and concisely.
+      - Check if the context and background of the question are adequately provided.
+      - Identify any specific points that need further clarification or elaboration.`;
       break;
     case "enhancement":
       prompt += `
-        - Are the proposed improvements and their reasons clearly described?
-        - Is the summary clear and understandable to everyone?
-        - Are the criteria for completion (Close conditions) clear and appropriate?
-        - Are there any additional notes or considerations?`;
+      - Scrutinize if the proposed improvements and their reasons are clearly and convincingly described.
+      - Verify if the summary is clear, understandable, and accessible to all intended audiences.
+      - Propose any additional notes or considerations that could refine the enhancement suggestion.`;
       break;
     case "documentation":
       prompt += `
-        - Is the documentation change specific and relevant?
-        - Are the reasons for the change and its impact clearly explained?
-        - Are there any additional notes or considerations?`;
+      - Review if the documentation change is specific, relevant, and well-justified.
+      - Assess if the reasons for the change and its expected impact are clearly explained.
+      - Offer any additional notes or considerations that could enrich the documentation update.`;
       break;
     case "help wanted":
       prompt += `
-        - Is the required assistance and its context clearly stated?
-        - Are the criteria for completion (Close conditions) clear and appropriate?
-        - Are there any specific skills or knowledge required?`;
+      - Analyze if the required assistance and its context are clearly and effectively communicated.
+      - Evaluate if the criteria for completion (Close conditions) are clear, appropriate, and well-defined.
+      - Suggest any specific skills or knowledge that are essential for addressing the help request.`;
       break;
     case "good first issue":
       prompt += `
-        - Is the issue approachable for beginners?
-        - Are the instructions and expected outcomes clear?
-        - Are there any additional resources or guidance provided?`;
+      - Determine if the issue is approachable and suitable for beginners.
+      - Check if the instructions and expected outcomes are clear, concise, and encouraging.
+      - Recommend any additional resources or guidance that could support newcomers tackling this issue.`;
       break;
     default:
       prompt += `
-        - Is the issue title and description clear and concise?
-        - Are the goals and expectations of the issue well-defined?
-        - Are there any additional notes or considerations?`;
+      - Review if the issue title and description are clear, concise, and effectively communicate the core issue.
+      - Assess if the goals and expectations of the issue are well-defined and realistic.
+      - Suggest any additional notes or considerations that could enhance the overall clarity and effectiveness of the issue.`;
   }
+
+  prompt += `\n`;
+
+  // Step 3: Suggest improvements for a better issue
+  prompt += `3. Suggestions for a Better Issue:\n`;
+  prompt += `Based on the review, suggest improvements for a clearer and more effective issue. Consider the clarity of the title, the completeness of the description, and any additional notes or considerations that might help.\n`;
 
   return prompt;
 }
