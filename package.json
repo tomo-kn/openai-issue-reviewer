@@ -2,6 +2,7 @@
   "name": "openai-issue-reviewer",
   "scripts": {
     "build": "tsc",
+    "watch": "tsc -w",
     "start": "node dist/app.js",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
