@@ -80,15 +80,16 @@ function determineLabelFromResponse(response) {
     }
 }
 function createPrompt(label, title, body, language) {
-    let prompt = `IMPORTANT: Entire response must be in the language with ISO code: ${language}.\n\n`;
+    let prompt = `IMPORTANT: Entire response must be in the language with ISO code: ${language}.\n\nYou are a seasoned engineer and Issue Review Professional.\n
+  Please respond appropriately according to the following 3 STEPs.`;
     // Step 1: Display the classified label
-    prompt += `1. Classified Label: ${label}\n\n`;
+    prompt += `1. Classified Label: ${label}\n\nThis is simply a matter of labeling the issue.\n\n`;
     // Step 2: Review the issue based on the label
-    prompt += `2. Issue Review:\n`;
+    prompt += `2. Issue Review\nReview the Issue based on the following information.\n`;
     // Instruct to review the title and description
-    prompt += `Please review the issue titled "${title}"`;
+    prompt += `The title is here:"${title}"`;
     if (body) {
-        prompt += ` with the following description: "${body}"`;
+        prompt += `The body is here:"${body}"`;
     }
     prompt += ` and provide a detailed analysis based on the label category.\n`;
     // Add specific review points based on the label
