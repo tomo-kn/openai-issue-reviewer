@@ -27,7 +27,6 @@ const labelNames = issue.labels.map((label) =>
 const model = labelNames.includes("issue review 4")
   ? "gpt-4-1106-preview"
   : "gpt-3.5-turbo";
-console.log(`Using model: ${model}`);
 const language = process.env.ISSUE_LANGUAGE ?? "en";
 
 async function reviewIssue() {
@@ -40,10 +39,6 @@ async function reviewIssue() {
       {
         role: "system",
         content: prompt,
-      },
-      {
-        role: "user",
-        content: "Please review the issue.",
       },
     ],
     model: model,
@@ -99,7 +94,7 @@ function createPrompt(
   body: string | null | undefined,
   language: string
 ) {
-  let prompt = `You are a seasoned engineer and a professional who reviews issue requirements for clarity and distinctness. Please output in the following format. However, be sure to use ${language} in your output.`;
+  let prompt = `IMPORTANT: Entire response must be in the language with ISO code: ${language}.\n\nYou are a seasoned engineer and a professional who reviews issue requirements for clarity and distinctness. Please output in the following format. `;
 
   // Step 1: Display the classified label
   prompt += `1. Classified Label: <simply display ${label} as it is >`;
