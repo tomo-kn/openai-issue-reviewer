@@ -25,6 +25,7 @@ const model = issue.labels.includes("issue review 4")
   ? "gpt-4-1106-preview"
   : "gpt-3.5-turbo";
 console.log(`Using model ${model}`);
+console.log(`labels: ${issue.labels}`);
 const language = process.env.ISSUE_LANGUAGE ?? "en";
 
 async function reviewIssue() {
