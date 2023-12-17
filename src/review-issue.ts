@@ -24,6 +24,7 @@ const body = issue.body;
 const model = issue.labels.includes("issue review 4")
   ? "gpt-4-1106-preview"
   : "gpt-3.5-turbo";
+console.log(`Using model ${model}`);
 const language = process.env.ISSUE_LANGUAGE ?? "en";
 
 async function reviewIssue() {
@@ -91,21 +92,13 @@ function createPrompt(
   body: string | null | undefined,
   language: string
 ) {
-  let prompt = `IMPORTANT: Entire response must be in the language with ISO code: ${language}.\n\nYou are a seasoned engineer and Issue Review Professional.\n
-  Please respond appropriately according to the following 3 STEPs.`;
+  let prompt = `You are a seasoned engineer and a professional who reviews issue requirements for clarity and distinctness. Please output in the following format. However, be sure to use ${language} in your output.`;
 
   // Step 1: Display the classified label
-  prompt += `1. Classified Label: ${label}\n\nThis is simply a matter of labeling the issue.\n\n`;
+  prompt += `1. Classified Label: <simply display ${label} as it is >`;
 
   // Step 2: Review the issue based on the label
-  prompt += `2. Issue Review\nReview the Issue based on the following information.\n`;
-
-  // Instruct to review the title and description
-  prompt += `The title is here:"${title}"`;
-  if (body) {
-    prompt += `The body is here:"${body}"`;
-  }
-  prompt += ` and provide a detailed analysis based on the label category.\n`;
+  prompt += `2. Issue Review: <Review the issue, The title is here:"${title}" The body is here:"${body}". Please refer to the following for perspectives on reviewing an issue. `;
 
   // Add specific review points based on the label
   switch (label.toLowerCase()) {
@@ -158,11 +151,15 @@ function createPrompt(
       - Suggest any additional notes or considerations that could enhance the overall clarity and effectiveness of the issue.`;
   }
 
-  prompt += `\n`;
+  prompt += `>`;
 
   // Step 3: Suggest improvements for a better issue
-  prompt += `3. Suggestions for a Better Issue:\n`;
-  prompt += `Based on the review, suggest improvements for a clearer and more effective issue. Consider the clarity of the title, the completeness of the description, and any additional notes or considerations that might help.\n`;
+  prompt += `3. Suggestions for a Better Issue:<Please suggest a better issue based on the above.>`;
+
+  prompt += `## Constraints\n
+- Always follow the 3-step format.
+- In the 2nd step, the phase of reviewing the issue, the content should be human-readable and understandable.
+- In the 3rd step, the phase to propose a better way to write the issue, the issue should be written in a way that is easier to understand than the current issue.`;
 
   return prompt;
 }
