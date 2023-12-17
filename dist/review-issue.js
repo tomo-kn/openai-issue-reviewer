@@ -27,8 +27,12 @@ async function reviewIssue() {
     const response = await openai.chat.completions.create({
         messages: [
             {
-                role: "user",
+                role: "system",
                 content: prompt,
+            },
+            {
+                role: "user",
+                content: "Please review the issue.",
             },
         ],
         model: model,
