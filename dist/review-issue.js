@@ -30,6 +30,17 @@ async function reviewIssue() {
                 role: "system",
                 content: prompt,
             },
+            {
+                role: "user",
+                content: `Please identify the issues contained in this Issue and suggest improvements.
+        Title: """
+        ${title}
+        """
+        body: """
+        ${body}
+        """
+        `,
+            },
         ],
         model: model,
     });
@@ -46,7 +57,9 @@ async function getLabelFromTitle(title) {
         messages: [
             {
                 role: "user",
-                content: `Classify the following issue title into one of these categories: Bug, Feature, Question, Enhancement, Documentation, Help Wanted, Good First Issue. Title: "${title}"`,
+                content: `Classify the following issue title into one of these categories: Bug, Feature, Question, Enhancement, Documentation, Help Wanted, Good First Issue. Title: """
+        ${title}
+        """`,
             },
         ],
         model: model,
@@ -83,9 +96,9 @@ function determineLabelFromResponse(response) {
 function createPrompt(label, title, body, language) {
     let prompt = `IMPORTANT: Entire response must be in the language with ISO code: ${language}.\n\nYou are a seasoned engineer and a professional who reviews issue requirements for clarity and distinctness. Please output in the following format. `;
     // Step 1: Display the classified label
-    prompt += `1. Classified Label: <simply display ${label} as it is >`;
+    prompt += `1. Classified Label: ${label}`;
     // Step 2: Review the issue based on the label
-    prompt += `2. Issue Review: <Review the issue, The title is here:"${title}" The body is here:"${body}". Please refer to the following for perspectives on reviewing an issue. `;
+    prompt += `2. Issue Review: <Review the issue based on the title and body provided by the user input. Please refer to the following for perspectives on reviewing an issue. `;
     // Add specific review points based on the label
     switch (label.toLowerCase()) {
         case "bug":
