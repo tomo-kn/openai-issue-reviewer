@@ -42,8 +42,7 @@ async function reviewIssue() {
       },
       {
         role: "user",
-        content: `IMPORTANT: Entire response must be in the language with ISO code: ${language}. Please ensure that all step labels and responses are in the specified language.
-        Please identify the issues contained in this Issue and suggest improvements.
+        content: `Please identify the issues contained in this Issue and suggest improvements.
         Title: """
         ${title}
         """
@@ -108,7 +107,7 @@ function createPrompt(
   body: string | null | undefined,
   language: string
 ) {
-  let prompt = `IMPORTANT: Entire response must be in the language with ISO code: ${language}. Please ensure that all step labels and responses are in the specified language.\n\nYou are a seasoned engineer and a professional who reviews issue requirements for clarity and distinctness. Please output in the following format. `;
+  let prompt = `IMPORTANT: Entire response must be in the language with ISO code: ${language}.\n\nYou are a seasoned engineer and a professional who reviews issue requirements for clarity and distinctness. Please output in the following format. `;
 
   // Step 1: Display the classified label
   prompt += `1. Classified Label: ${label}`;
