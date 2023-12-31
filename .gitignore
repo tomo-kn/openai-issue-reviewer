@@ -9,6 +9,3 @@ node_modules
 
 # OS metadata
 .DS_Store
-
-# Bun dependency lock file
-bun.lockb
