@@ -15,7 +15,7 @@ inputs:
 
 runs:
   using: 'node20'
-  main: 'dist/review-issue.js'
+  main: 'dist/index.js'
 
 branding:
   icon: 'compass'

@@ -20,9 +20,9 @@ Automated issues reviewing with ChatGPT.
        name: openai-issue-reviewer
        runs-on: ubuntu-latest
        steps:
-         - uses: tomo-kn/openai-issue-reviewer@v1
+         - uses: tomo-kn/openai-issue-reviewer@v1.0.0 # please use latest version
            name: openai-issue-reviewer
-           env:
+           with:
              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
              OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
              ISSUE_LANGUAGE: "ja-JP" # default: "en"

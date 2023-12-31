@@ -58,7 +58,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ISSUE_LANGUAGE: ${{ vars.ISSUE_LANGUAGE }}
-        run: bun ./dist/review-issue.js
+        run: bun ./dist/index.js
 
       # TODO: Implement hiding old comments when GitHub provides an API for changing comment states (e.g., to 'outdated' or 'off-topic').
       # ref: https://docs.github.com/en/rest/issues
