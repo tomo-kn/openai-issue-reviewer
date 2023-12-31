@@ -1,0 +1,22 @@
+name: "openai-issue-reviewer"
+author: "tomo-kn"
+description: "Automated issue reviewing using OpenAI, specifically for GitHub Issues."
+inputs:
+  GITHUB_TOKEN:
+    description: "GitHub token used to interact with issues."
+    required: true
+  OPENAI_API_KEY:
+    description: "API key for invoking OpenAI services."
+    required: true
+  ISSUE_LANGUAGE:
+    description: "Language of the issue."
+    required: false
+
+
+runs:
+  using: 'node20'
+  main: 'dist/review-issue.js'
+
+branding:
+  icon: 'compass'
+  color: 'yellow'

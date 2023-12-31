@@ -1,40 +1,52 @@
+import * as core from "@actions/core";
 import { Octokit } from "@octokit/rest";
 import { context } from "@actions/github";
 import OpenAI from "openai";
 
-const githubToken = process.env.GITHUB_TOKEN;
-
-const octokit = new Octokit({ auth: githubToken });
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-const issueNumber = context.issue.number;
-const owner = context.repo.owner;
-const repo = context.repo.repo;
-
-const { data: issue } = await octokit.issues.get({
-  owner,
-  repo,
-  issue_number: issueNumber,
-});
-
-const title = issue.title;
-const body = issue.body;
-const labelNames = issue.labels.map((label) =>
-  typeof label === "string" ? label : label?.name
-);
-const model = labelNames.includes("issue review 4")
-  ? "gpt-4-1106-preview"
-  : "gpt-3.5-turbo-1106";
-const language = process.env.ISSUE_LANGUAGE ?? "en";
-
 async function reviewIssue() {
-  const label = await getLabelFromTitle(title);
+  const githubToken = core.getInput("GITHUB_TOKEN", { required: true });
+  const openaiApiKey = core.getInput("OPENAI_API_KEY", { required: true });
+  const language = core.getInput("ISSUE_LANGUAGE") || "en";
+
+  const octokit = new Octokit({ auth: githubToken });
+  const openai = new OpenAI({ apiKey: openaiApiKey });
+
+  const issueNumber = context.issue.number;
+  const owner = context.repo.owner;
+  const repo = context.repo.repo;
+
+  const { data: issue } = await octokit.issues.get({
+    owner,
+    repo,
+    issue_number: issueNumber,
+  });
+
+  const title = issue.title;
+  const body = issue.body;
+  const labelNames = issue.labels.map((label) =>
+    typeof label === "string" ? label : label?.name
+  );
+  const model = labelNames.includes("issue review 4")
+    ? "gpt-4-1106-preview"
+    : "gpt-3.5-turbo-1106";
+  const response1 = await openai.chat.completions.create({
+    messages: [
+      {
+        role: "user",
+        content: `Classify the following issue title into one of these categories: Bug, Feature, Question, Enhancement, Documentation, Help Wanted, Good First Issue. Title: """
+        ${title}
+        """`,
+      },
+    ],
+    model: model,
+  });
+
+  const labelResponse = response1.choices[0].message.content?.trim();
+  const label = determineLabelFromResponse(labelResponse ?? "Unknown");
 
   const prompt = createPrompt(label, title, body, language);
 
-  const response = await openai.chat.completions.create({
+  const response2 = await openai.chat.completions.create({
     messages: [
       {
         role: "system",
@@ -55,7 +67,7 @@ async function reviewIssue() {
     model: model,
   });
 
-  const reviewComment = response.choices[0].message.content?.trim();
+  const reviewComment = response2.choices[0].message.content?.trim();
 
   await octokit.issues.createComment({
     owner,
@@ -63,23 +75,6 @@ async function reviewIssue() {
     issue_number: issueNumber,
     body: reviewComment ?? "No comment",
   });
-}
-
-async function getLabelFromTitle(title: string): Promise<string> {
-  const response = await openai.chat.completions.create({
-    messages: [
-      {
-        role: "user",
-        content: `Classify the following issue title into one of these categories: Bug, Feature, Question, Enhancement, Documentation, Help Wanted, Good First Issue. Title: """
-        ${title}
-        """`,
-      },
-    ],
-    model: model,
-  });
-
-  const labelResponse = response.choices[0].message.content?.trim();
-  return determineLabelFromResponse(labelResponse ?? "Unknown");
 }
 
 function determineLabelFromResponse(response: string): string {
