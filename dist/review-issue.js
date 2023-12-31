@@ -4,8 +4,7 @@ import { context } from "@actions/github";
 import OpenAI from "openai";
 async function reviewIssue() {
     const githubToken = core.getInput("GITHUB_TOKEN") || process.env.GITHUB_TOKEN;
-    const openaiApiKey = core.getInput("OPENAI_API_KEY");
-    console.log(`openaiApiKey: ${openaiApiKey.slice(0, 8)}`);
+    const openaiApiKey = core.getInput("OPENAI_API_KEY") || process.env.OPENAI_API_KEY;
     const language = core.getInput("ISSUE_LANGUAGE") || "en";
     const octokit = new Octokit({ auth: githubToken });
     const openai = new OpenAI({ apiKey: openaiApiKey });
