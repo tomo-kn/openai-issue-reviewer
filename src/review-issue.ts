@@ -3,7 +3,7 @@ import { Octokit } from "@octokit/rest";
 import { context } from "@actions/github";
 import OpenAI from "openai";
 
-async function reviewIssue() {
+export async function reviewIssue() {
   const githubToken = core.getInput("GITHUB_TOKEN") || process.env.GITHUB_TOKEN;
   const openaiApiKey =
     core.getInput("OPENAI_API_KEY") || process.env.OPENAI_API_KEY;
@@ -175,8 +175,3 @@ function createPrompt(
 
   return prompt;
 }
-
-reviewIssue().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});

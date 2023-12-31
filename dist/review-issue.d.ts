@@ -1,1 +1,1 @@
-export {};
+export declare function reviewIssue(): Promise<void>;

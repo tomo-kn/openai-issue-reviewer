@@ -2,7 +2,7 @@ import * as core from "@actions/core";
 import { Octokit } from "@octokit/rest";
 import { context } from "@actions/github";
 import OpenAI from "openai";
-async function reviewIssue() {
+export async function reviewIssue() {
     const githubToken = core.getInput("GITHUB_TOKEN") || process.env.GITHUB_TOKEN;
     const openaiApiKey = core.getInput("OPENAI_API_KEY") || process.env.OPENAI_API_KEY;
     const language = core.getInput("ISSUE_LANGUAGE") || process.env.ISSUE_LANGUAGE || "en";
@@ -155,7 +155,3 @@ function createPrompt(label, title, body, language) {
 - In the 3rd step, the phase to propose a better way to write the issue, the issue should be written in a way that is easier to understand than the current issue.`;
     return prompt;
 }
-reviewIssue().catch((error) => {
-    console.error(error);
-    process.exit(1);
-});
