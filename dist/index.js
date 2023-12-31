@@ -1,4 +1,4 @@
-import { reviewIssue } from "./reviewIssue";
+import { reviewIssue } from "./review-issue";
 
 async function run() {
   try {
