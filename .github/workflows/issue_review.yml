@@ -2,7 +2,7 @@ name: Issue Review
 
 on:
   issues:
-    types: [opened, edited, labeled]
+    types: [edited, labeled]
 
 jobs:
   review:
