@@ -45005,6 +45005,34 @@ async function reviewIssue() {
     const issueNumber = github.context.issue.number;
     const owner = github.context.repo.owner;
     const repo = github.context.repo.repo;
+    const labelsToCreate = [
+        {
+            name: "issue review 3.5",
+            color: "f29513",
+            description: "Label for issue review using GPT-3.5",
+        },
+        {
+            name: "issue review 4",
+            color: "f29513",
+            description: "Label for issue review using GPT-4",
+        },
+    ];
+    const existingLabels = await octokit.issues.listLabelsForRepo({
+        owner,
+        repo,
+    });
+    for (const label of labelsToCreate) {
+        const labelExists = existingLabels.data.some((existingLabel) => existingLabel.name === label.name);
+        if (!labelExists) {
+            await octokit.issues.createLabel({
+                owner,
+                repo,
+                name: label.name,
+                color: label.color,
+                description: label.description,
+            });
+        }
+    }
     const { data: issue } = await octokit.issues.get({
         owner,
         repo,
@@ -45013,9 +45041,15 @@ async function reviewIssue() {
     const title = issue.title;
     const body = issue.body;
     const labelNames = issue.labels.map((label) => typeof label === "string" ? label : label?.name);
+    if (!labelNames.includes("issue review 4") &&
+        !labelNames.includes("issue review 3.5")) {
+        console.log("No relevant labels found. Exiting...");
+        return;
+    }
     const model = labelNames.includes("issue review 4")
         ? "gpt-4-1106-preview"
         : "gpt-3.5-turbo-1106";
+    console.log(`Using model: ${model}`);
     const response1 = await openai.chat.completions.create({
         messages: [
             {
