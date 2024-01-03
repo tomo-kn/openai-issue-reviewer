@@ -19,13 +19,15 @@ Automated issues reviewing with ChatGPT.
      openai-issue-reviewer:
        runs-on: ubuntu-latest
        steps:
-         - uses: tomo-kn/openai-issue-reviewer@v1.0.0 # Please use latest version.
+         - uses: tomo-kn/openai-issue-reviewer@v1.0.0 # Please use the latest version.
            name: openai-issue-reviewer
            with:
              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
              OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
              ISSUE_LANGUAGE: "ja-JP" # Set to your preferred language. Default is "en" (English).
    ```
+
+3. **Initial Setup**: For the first time, manually edit an issue or add a label to trigger the action. This will create the labels "issue review 3.5" and "issue review 4" in your repository.
 
 ## Features
 
